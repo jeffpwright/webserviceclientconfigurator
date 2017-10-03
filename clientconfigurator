@@ -1,0 +1,32 @@
+//allow client apps to not have to carry an app.config
+    class ClientConfigurator
+    {
+        public static TargetWebServiceClient GetConfiguredClient()
+        {
+            var binding = new BasicHttpBinding();
+            //binding.Name = "BasicHttpsBinding_ITargetWebService";
+            binding.HostNameComparisonMode = HostNameComparisonMode.StrongWildcard;
+            binding.OpenTimeout = new TimeSpan(0, 0, 10);
+            binding.CloseTimeout = new TimeSpan(0, 0, 10);
+            binding.SendTimeout = new TimeSpan(0, 0, 10);
+            binding.Security = SetBindingSecurity();
+            var epa = new EndpointAddress("https://somewebservice.svc");
+            return new TargetWebServiceClient(binding, epa);
+        }
+
+        private static BasicHttpSecurity SetBindingSecurity()
+        {
+            var security = new BasicHttpSecurity();
+            var transport = new HttpTransportSecurity();
+            var message = new BasicHttpMessageSecurity();
+            security.Mode = BasicHttpSecurityMode.Transport;
+            transport.ClientCredentialType = HttpClientCredentialType.None;
+            transport.ProxyCredentialType = HttpProxyCredentialType.None;
+            transport.Realm = "";
+            message.ClientCredentialType = BasicHttpMessageCredentialType.UserName;
+            message.AlgorithmSuite = System.ServiceModel.Security.SecurityAlgorithmSuite.Default;
+            security.Transport = transport;
+            security.Message = message;
+            return security;
+        }
+    }
